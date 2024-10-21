@@ -1,3 +1,5 @@
+from collections import Counter
+messageProf = "tuayyusskyjkymktyyosvrkykzzxgtwaorrkykztuaytgbutywaklgoxkjgbktzaxkyiktkyutzwakjkborgotkyinuykyjkyyuaxikyjkttaoykzjkjkygmxksktzykrrkybuayskzzktzktxkzgxjvuaxrkjotkxpktkbuoybxgosktzvgyrkvrgoyoxwakrutvkazezxuabkxhorhurknuhhozzurqokt"
 message = "Hello, World!"
 alpha = "abcdefghijklmnopqrstuvwxyz"
 def code (lettre):
@@ -33,4 +35,9 @@ def dechiffreCesar(cryptogramme, cle):
     for i in cryptogramme:
         message += lettre((code(i) - cle) % 26)
     return message
-print(dechiffreCesar("khoorzruog", 3))
+c=Counter(messageProf)
+freq=c.most_common(10)
+print(freq)
+print(dechiffreCesar(messageProf, (code("k")-code("e"))))
+
+# algortihme d'euclide extendu : 
