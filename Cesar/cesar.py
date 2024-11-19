@@ -118,7 +118,7 @@ print(freq)
 a = 17
 b = 3
 print(dechiffreAffine(crypto2, a, b))
-print(code('t'))
-print(code('e'))
-print(code('x'))
-print(code('s'))
+print("Lettre la plus frequente dans crypto 2, son rang :", code('t'))
+print("Le code de 'e' : ", code('e'))
+print("La deuxieme lettre la plus frequente dans crypto 2, son rang : ",code('x'))
+print("Le code de 's' : ",code('s'))
