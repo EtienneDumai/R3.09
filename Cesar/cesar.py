@@ -1,8 +1,9 @@
-from collections import Counter
+
 messageProf = "tuayyusskyjkymktyyosvrkykzzxgtwaorrkykztuaytgbutywaklgoxkjgbktzaxkyiktkyutzwakjkborgotkyinuykyjkyyuaxikyjkttaoykzjkjkygmxksktzykrrkybuayskzzktzktxkzgxjvuaxrkjotkxpktkbuoybxgosktzvgyrkvrgoyoxwakrutvkazezxuabkxhorhurknuhhozzurqokt"
 message = "Hello, World!"
 alpha = "abcdefghijklmnopqrstuvwxyz"
-crypto2 = 'itxygjoqtchjoadzdjxhutjxxdqltfqtygtfwtctbthztogjtxfkkjoditzhqogtgldgxjwhfxidlghvtmxfgydghitwhfxtotxfqxhowhfxogdsjxxtmitxygjodidjq'
+crypto2 = 'atgtqcxshzzdbtdltfepfjydgitqodfwtqoitxkhfxcdzhfgitxwjxjhqqdjgtxdltfepfjchqqtgdjtqowjtdfqgtwtzjbftictltgwdqotx'
+from collections import Counter 
 def code (lettre):
     code = 0
     if len (lettre) != 1:
@@ -23,23 +24,6 @@ def lettre(code):
     return lettre
 
 print(lettre(25))
-
-def chiffreCesar(message, cle):
-    cryptogramme = ""
-    for i in message:
-        cryptogramme += lettre((code(i) + cle) % 26)
-    return cryptogramme
-print(chiffreCesar(message, 3))
-
-def dechiffreCesar(cryptogramme, cle):
-    message = ""
-    for i in cryptogramme:
-        message += lettre((code(i) - cle) % 26)
-    return message
-c=Counter(messageProf)
-freq=c.most_common(10)
-print(freq)
-print(dechiffreCesar(messageProf, (code("k")-code("e"))))
 
 #Inverse modulaire : 
 def inverse_modulaire(n, m):
@@ -81,11 +65,7 @@ def chiffreAffine(message, a, b):
             cryptogramme += lettre
     return cryptogramme
 
-# Exemple d'utilisation
-message = "election"
-a = 3
-b = 5
-print(chiffreAffine(message, a, b))
+
 
 #dechiffrement affine :
 def dechiffreAffine(cryptogramme, a, b):
@@ -110,8 +90,8 @@ def dechiffreAffine(cryptogramme, a, b):
         else:
             message += lettre
     return message
-#Exemple d'utilisation
-cryptogramme = "rmrlkdvs"
+
+
 c=Counter(crypto2)
 freq=c.most_common(10)
 print(freq)
@@ -120,5 +100,6 @@ b = 3
 print(dechiffreAffine(crypto2, a, b))
 print("Lettre la plus frequente dans crypto 2, son rang :", code('t'))
 print("Le code de 'e' : ", code('e'))
-print("La deuxieme lettre la plus frequente dans crypto 2, son rang : ",code('x'))
-print("Le code de 's' : ",code('s'))
+print("La deuxieme lettre la plus frequente dans crypto 2, son rang : ",code('d'))
+print("Le code de 's' : ",code('i'))
+print(inverse_modulaire(-9,26))
