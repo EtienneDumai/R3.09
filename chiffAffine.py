@@ -99,12 +99,6 @@ def analyse_frequence(message):
 def dechiffrer_avec_hypotheses(crypto):
     """
     Tente de déchiffrer un message crypté en utilisant des hypothèses sur les lettres les plus fréquentes.
-    
-    Args:
-    crypto (str): Le message chiffré à déchiffrer.
-
-    Returns:
-    None: Affiche les hypothèses et les messages déchiffrés possibles.
     """
     # Identifier la lettre la plus fréquente dans le message crypté
     freqMess = analyse_frequence(crypto)
