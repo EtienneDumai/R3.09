@@ -2,7 +2,7 @@ from collections import Counter
 import string
 
 # Alphabet de référence
-alpha = string.ascii_lowercase
+alpha = "abcdefghijklmnopqrstuvwxyz"
 
 def code (lettre):
     code = 0
@@ -22,42 +22,26 @@ def lettre(code):
         lettre = alpha[code]
     return lettre
 
-def pgcdEtendu(a, b):
-    """
-    Calcule le pgcd de deux nombres et l'inverse modulaire de 'a' modulo 'b' en utilisant l'algorithme d'Euclide étendu.
-    
-    Args:
-    a (int): Le premier nombre.
-    b (int): Le deuxième nombre.
-
-    Returns:
-    tuple: Un tuple (pgcd, x, y) où pgcd est le plus grand commun diviseur et (x, y) sont les coefficients de l'algorithme d'Euclide étendu.
-    """
-    if a == 0:
-        return b, 0, 1
-    gcd, x1, y1 = pgcdEtendu(b % a, a)
-    x = y1 - (b // a) * x1
-    y = x1
-    return gcd, x, y
 
 def inverse(a, m):
     """
-    Calcule l'inverse modulaire de 'a' modulo 'm'.
-    
-    Args:
-    a (int): Le nombre dont on veut calculer l'inverse.
-    m (int): Le module pour l'inverse.
-
-    Returns:
-    int: L'inverse de 'a' modulo 'm'.
-
-    Raises:
-    ValueError: Si l'inverse n'existe pas (c'est-à-dire si a et m ne sont pas premiers entre eux).
+    Calcule l'inverse modulaire de n modulo m en utilisant l'algorithme d'Euclide étendu.
+    Retourne l'inverse si il existe, sinon retourne None si n et m ne sont pas premiers entre eux.
     """
-    pgcd, x, _ = pgcdEtendu(a, m)
-    if pgcd != 1:
-        raise ValueError(f"Aucun inverse modulaire pour {a} modulo {m}")
-    return x % m
+    t, new_t = 0, 1
+    r, new_r = m, n
+    
+    while new_r != 0:
+        quotient = r // new_r
+        t, new_t = new_t, t - quotient * new_t
+        r, new_r = new_r, r - quotient * new_r
+
+    if r > 1:
+        return None  # n n'a pas d'inverse mod m
+    if t < 0:
+        t = t + m
+
+    return t
 
 def dechiffre(message_chiffre, a, b):
     """
@@ -85,25 +69,19 @@ def dechiffre(message_chiffre, a, b):
 def analyse_frequence(message):
     """
     Analyse la fréquence des lettres dans un message et retourne les lettres les plus fréquentes.
-    
-    Args:
-    message (str): Le message à analyser.
-
-    Returns:
-    list: Une liste des lettres du message, triée par fréquence décroissante.
     """
-    c = Counter(char for char in message if char in alpha)
-    freq = c.most_common()
-    return [couple[0] for couple in freq]
+    c=Counter(message)
+    freq=c.most_common(10)
+    print(freq)
 
 def dechiffrer_avec_hypotheses(crypto):
     """
     Tente de déchiffrer un message crypté en utilisant des hypothèses sur les lettres les plus fréquentes.
     """
-    # Identifier la lettre la plus fréquente dans le message crypté
-    freqMess = analyse_frequence(crypto)
-    lettre_codee_1 = freqMess[0]  # Lettre la plus fréquente
-    code_lettre_codee_1 = code(lettre_codee_1)
+    # Connaitre la lettre qui apparait le plus dans le message codé (lettre la plus frequente)
+    freq = analyse_frequence(crypto)
+    lettrecode1 = freq[0]  # Lettre la plus fréquente
+    codelettrecode1 = code(lettrecode1)
 
     # Liste des hypothèses pour la deuxième lettre fréquente
     lettres_frequentes_en_clair = ['a', 't', 'o', 'i', 'n']
@@ -115,26 +93,26 @@ def dechiffrer_avec_hypotheses(crypto):
             diff = (code(lettre_claire2) - code('e')) % 26
 
             # Calculer le delta entre la 2e lettre cryptée et la 1re
-            for lettre_codee_2 in freqMess[1:]:  # Tester les autres lettres fréquentes du texte crypté
+            for lettrecodee2 in freq[1:]:  # Tester les autres lettres fréquentes du texte crypté
                 code_lettre_codee_2 = code(lettre_codee_2)
-                delta = (code_lettre_codee_2 - code_lettre_codee_1) % 26
+                delta = (code_lettre_codee_2 - codelettrecode1) % 26
 
                 # Résoudre pour a et b
                 a = (delta * inverse(diff, 26)) % 26
-                b = (code_lettre_codee_1 - a * code('e')) % 26
+                b = (codelettrecode1 - a * code('e')) % 26
 
-                print(f"Essai avec : 'e' -> {lettre_codee_1}, {lettre_claire2} -> {lettre_codee_2}")
+                print(f"Essai avec : 'e' -> {lettrecode1}, {lettre_claire2} -> {lettre_codee_2}")
                 print(f"Clés trouvées : a = {a}, b = {b}")
 
                 # Déchiffrer le message
                 message_dechiffre = dechiffre(crypto, a, b)
                 messages_possibles.append((lettre_claire2, lettre_codee_2, message_dechiffre))
         except ValueError as e:
-            print(f"Erreur pour {lettre_claire2} : {e}")
+            print(f"Cela ne marche pas pour {lettre_claire2} : {e}")
 
     # Afficher les résultats
     for lettre_claire2, lettre_codee_2, message in messages_possibles:
-        print(f"Supposition : 'e' -> {lettre_codee_1}, {lettre_claire2} -> {lettre_codee_2}")
+        print(f"Supposition : 'e' -> {lettrecode1}, {lettre_claire2} -> {lettre_codee_2}")
         print(f"Message déchiffré :\n{message}\n")
 
 # Exemple d'appel de la fonction
