@@ -2,6 +2,7 @@
 messageProf = "tuayyusskyjkymktyyosvrkykzzxgtwaorrkykztuaytgbutywaklgoxkjgbktzaxkyiktkyutzwakjkborgotkyinuykyjkyyuaxikyjkttaoykzjkjkygmxksktzykrrkybuayskzzktzktxkzgxjvuaxrkjotkxpktkbuoybxgosktzvgyrkvrgoyoxwakrutvkazezxuabkxhorhurknuhhozzurqokt"
 message = "Hello, World!"
 alpha = "abcdefghijklmnopqrstuvwxyz"
+lettre_alpha = {i: lettre for i, lettre in enumerate(alpha)}
 crypto2 = 'atgtqcxshzzdbtdltfepfjydgitqodfwtqoitxkhfxcdzhfgitxwjxjhqqdjgtxdltfepfjchqqtgdjtqowjtdfqgtwtzjbftictltgwdqotx'
 from collections import Counter 
 def code (lettre):
@@ -13,7 +14,6 @@ def code (lettre):
             if lettre == alpha[i]:
                 code = i
     return code
-print(code("z"))
 
 def lettre(code):
     lettre = ""
@@ -22,8 +22,6 @@ def lettre(code):
     else:
         lettre = alpha[code]
     return lettre
-
-print(lettre(25))
 
 #Inverse modulaire : 
 def inverse_modulaire(n, m):
@@ -90,16 +88,93 @@ def dechiffreAffine(cryptogramme, a, b):
         else:
             message += lettre
     return message
+crypto2 = 'atgtqcxshzzdbtdltfepfjydgitqodfwtqoitxkhfxcdzhfgitxwjxjhqqdjgtxdltfepfjchqqtgdjtqowjtdfqgtwtzjbftictltgwdqotx'
+def dechiffreAffine(message_crypte, a, b):
+    """
+    Déchiffre un message en utilisant la clé affine.
+    Args:
+    - message_crypte (str): le message crypté
+    - a (int): coefficient multiplicatif de la clé affine
+    - b (int): décalage de la clé affine
+
+    Returns:
+    - str: le message déchiffré
+    """
+    message_dechiffre = ""
+    inverse_a = inverse_modulaire(a, 26)
+    if inverse_a is None:
+        raise ValueError(f"Pas d'inverse modulaire pour a = {a}")
+
+    for lettre in message_crypte:
+        if lettre in alpha:  # Vérifie que la lettre est dans l'alphabet
+            code_lettre = code(lettre)
+            code_lettre_claire = (inverse_a * (code_lettre - b)) % 26
+            message_dechiffre += lettre_alpha[code_lettre_claire]
+        else:
+            message_dechiffre += lettre  # Conserve les caractères non-alphabétiques
+    return message_dechiffre
 
 
-c=Counter(crypto2)
-freq=c.most_common(10)
-print(freq)
-a = 17
-b = 3
-print(dechiffreAffine(crypto2, a, b))
-print("Lettre la plus frequente dans crypto 2, son rang :", code('t'))
-print("Le code de 'e' : ", code('e'))
-print("La deuxieme lettre la plus frequente dans crypto 2, son rang : ",code('d'))
-print("Le code de 's' : ",code('i'))
-print(inverse_modulaire(-9,26))
+def crypto22(message_crypte):
+    """
+    Déchiffre un message en utilisant une boucle pour tester 5 hypothèses de lettres fréquentes en clair.
+    Calcule dynamiquement a et b à chaque hypothèse.
+
+    Args:
+    - message_crypte (str): le message crypté à déchiffrer.
+
+    Returns:
+    - None: Affiche les messages déchiffrés pour chaque hypothèse.
+    """
+    modulo = 26
+
+    # Analyse fréquentielle du texte crypté
+    c = Counter(message_crypte)
+    freq = c.most_common(2)
+    lettre_codee_1 = freq[0][0]
+    lettre_codee_2 = freq[1][0]
+    code_lettre_codee_1 = code(lettre_codee_1)
+    code_lettre_codee_2 = code(lettre_codee_2)
+    compteur=1
+    print(f"Lettre codée 1 : '{lettre_codee_1}' (la plus frequente dans le texte fréquente)")
+    print(f"Lettre codée 2 : '{lettre_codee_2}' (deuxième plus fréquente)\n")
+
+    # Lettres fréquentes en clair (hypothèses)
+    lettres_frequentes_en_clair = ['i', 'a', 's', 't', 'n']
+    for lettre_claire in lettres_frequentes_en_clair:
+        print(f"ESSAI {compteur}")
+        print(f"Test de l'hypothèse : '{lettre_claire}' comme 2e lettre fréquente en clair")
+        compteur+=1
+        # Calcul des différences pour trouver a
+        delta_code = (code_lettre_codee_2 - code_lettre_codee_1) % modulo
+        diff_clair = (code(lettre_claire) - code('e')) % modulo
+        inverse_diff_clair = inverse_modulaire(diff_clair, modulo)
+
+        if inverse_diff_clair is None:
+            print(f"Pas d'inverse modulaire pour la différence {diff_clair}. Hypothèse ignorée.\n")
+            continue
+
+        # Calcul de a et b
+        a = (delta_code * inverse_diff_clair) % modulo
+        b = (code_lettre_codee_1 - a * code('e')) % modulo
+
+        # Vérification des clés
+        if inverse_modulaire(a, modulo) is None:
+            print(f"Clé invalide : a = {a}, b = {b}. Hypothèse ignorée.\n")
+            continue
+
+        # Déchiffrement du message
+        message_dechiffre = dechiffreAffine(message_crypte, a, b)
+        if message_dechiffre is None:
+            print(f"Impossible de déchiffrer avec a = {a}, b = {b}\n")
+            continue
+
+        print(f"Clés trouvées : a = {a}, b = {b}")
+        print(f"Message déchiffré :\n{message_dechiffre}\n")
+
+
+# Exemple d'appel
+crypto2 = "atgtqcxshzzdbtdltfepfjydgitqodfwtqoitxkhfxcdzhfgitxwjxjhqqdjgtxdltfepfjchqqtgdjtqowjtdfqgtwtzjbftictltgwdqotx"
+crypto22(crypto2)
+
+    

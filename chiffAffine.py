@@ -1,5 +1,7 @@
 from collections import Counter
 import string
+crypto2 = 'atgtqcxshzzdbtdltfepfjydgitqodfwtqoitxkhfxcdzhfgitxwjxjhqqdjgtxdltfepfjchqqtgdjtqowjtdfqgtwtzjbftictltgwdqotx'
+
 
 # Alphabet de référence
 alpha = "abcdefghijklmnopqrstuvwxyz"
@@ -23,7 +25,7 @@ def lettre(code):
     return lettre
 
 
-def inverse(a, m):
+def inverse(n, m):
     """
     Calcule l'inverse modulaire de n modulo m en utilisant l'algorithme d'Euclide étendu.
     Retourne l'inverse si il existe, sinon retourne None si n et m ne sont pas premiers entre eux.
@@ -74,48 +76,80 @@ def analyse_frequence(message):
     freq=c.most_common(10)
     print(freq)
 
-def dechiffrer_avec_hypotheses(crypto):
+from collections import Counter
+
+# Alphabet de référence
+alpha = "abcdefghijklmnopqrstuvwxyz"
+
+def analyse_frequence(message):
     """
-    Tente de déchiffrer un message crypté en utilisant des hypothèses sur les lettres les plus fréquentes.
+    Effectue une analyse fréquentielle du message.
+    :param message: Texte à analyser
+    :param top_n: Nombre de lettres les plus fréquentes à extraire
+    :return: Liste des lettres les plus fréquentes
     """
-    # Connaitre la lettre qui apparait le plus dans le message codé (lettre la plus frequente)
-    freq = analyse_frequence(crypto)
-    lettrecode1 = freq[0]  # Lettre la plus fréquente
-    codelettrecode1 = code(lettrecode1)
+    c = Counter()
+    for lettre in message:
+        if lettre in alpha:
+            c[lettre] += 1
+    freq = c.most_common(5)
+    return [lettre[0] for lettre in freq]  # Retourne seulement les lettres fréquentes
 
-    # Liste des hypothèses pour la deuxième lettre fréquente
-    lettres_frequentes_en_clair = ['a', 't', 'o', 'i', 'n']
-    messages_possibles = []
+def dechiffreAffine(cryptogramme, a, b):
+    """
+    Déchiffre un cryptogramme chiffré avec le chiffrement affine.
+    x = (a^(-1) * (y - b)) % 26
+    """
+    # Calculer l'inverse de a modulo 26
+    a_inv = inverse(a, 26)
+    if a_inv is None:
+        return "La clé a n'a pas d'inverse modulo 26."
 
-    for lettre_claire2 in lettres_frequentes_en_clair:
-        try:
-            # Indices pour 'e' (première lettre fréquente) et la lettre testée
-            diff = (code(lettre_claire2) - code('e')) % 26
+    message = ""
+    for lettre in cryptogramme:
+        if lettre.isalpha():
+            # Convertir la lettre en minuscule et en code ASCII (a -> 0, b -> 1, ..., z -> 25)
+            y = ord(lettre.lower()) - ord('a')
+            # Appliquer la transformation affine inverse
+            x = (a_inv * (y - b)) % 26
+            # Convertir le résultat en lettre et ajouter au message
+            message += chr(x + ord('a'))
+        else:
+            message += lettre
+    return message
 
-            # Calculer le delta entre la 2e lettre cryptée et la 1re
-            for lettrecodee2 in freq[1:]:  # Tester les autres lettres fréquentes du texte crypté
-                code_lettre_codee_2 = code(lettre_codee_2)
-                delta = (code_lettre_codee_2 - codelettrecode1) % 26
+def affine_decrypt(message_chiffre):
+    """
+    Déchiffre un message chiffré en utilisant un encodage affine.
+    Affiche exactement 5 messages déchiffrés maximum avec leurs clés.
+    """
+    modulus = 26
 
-                # Résoudre pour a et b
-                a = (delta * inverse(diff, 26)) % 26
-                b = (codelettrecode1 - a * code('e')) % 26
+    # Lettres claires fréquentes limitées à ['a', 'i', 't', 's', 'n']
+    lettres_claires = ['a', 'i', 't', 's', 'n']
 
-                print(f"Essai avec : 'e' -> {lettrecode1}, {lettre_claire2} -> {lettre_codee_2}")
-                print(f"Clés trouvées : a = {a}, b = {b}")
+    # Analyse fréquentielle du texte chiffré
+    lettres_chiffrees = analyse_frequence(message_chiffre)
+    lettrePluFreseq = lettres_chiffrees[0]
+    lettre2PluFreseq = lettres_chiffrees[1]
+        # On parcourt les lettres claires et chiffrées
+    for iN in range(0,5):
+        print(lettres_claires[iN])
+        for lettre_chiffree in lettres_chiffrees:
+            i_clair = code(lettres_claires[iN])
+            
+            # Calculer a en résolvant (a * i_clair) ≡ j_chiffre (mod 26)
+            diff_i_j = (4 - i_clair) % modulus
+            inverse_i_clair = inverse(i_clair, modulus)
+            a = (inverse_i_clair * diff_i_j) % modulus
+            # Calculer b
+            b = ((code(lettrePluFreseq)-code(lettre2PluFreseq)) - a * i_clair) % modulus
 
-                # Déchiffrer le message
-                message_dechiffre = dechiffre(crypto, a, b)
-                messages_possibles.append((lettre_claire2, lettre_codee_2, message_dechiffre))
-        except ValueError as e:
-            print(f"Cela ne marche pas pour {lettre_claire2} : {e}")
+            print(f"Clé a = {a}, Clé b = {b}\n")
+            print("Message déchiffré :")
+            print(dechiffreAffine(message_chiffre, a, b))
 
-    # Afficher les résultats
-    for lettre_claire2, lettre_codee_2, message in messages_possibles:
-        print(f"Supposition : 'e' -> {lettrecode1}, {lettre_claire2} -> {lettre_codee_2}")
-        print(f"Message déchiffré :\n{message}\n")
 
-# Exemple d'appel de la fonction
-c = "edqdkilofppxtdxndbmvbjaxqudkgxbwdkgudlyfblixpfbqudlwjljfkkxjqdlxndbmvbjifkkdqxjdkgwjdxbkqdwdpjtbduidndqwxkgdl"
-crypto_message = 'atgtqcxshzzdbtdltfepfjydgitqodfwtqoitxkhfxcdzhfgitxwjxjhqqdjgtxdltfepfjchqqtgdjtqowjtdfqgtwtzjbftictltgwdqotx'
-message_dechiffre = dechiffrer_avec_hypotheses(crypto_message)
+
+print(analyse_frequence(crypto2))
+print(affine_decrypt(crypto2))
